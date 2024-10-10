@@ -1,0 +1,5 @@
+# First turn on the venv
+source venv/bin/activate
+
+# And then
+python3 app.py
