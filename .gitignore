@@ -1,0 +1,5 @@
+command.txt
+config.py
+logs/
+__pycache__/
+venv/
