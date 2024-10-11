@@ -3,140 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <title>Log Monitoring</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f0f0f0;
-        }
-        .tabs {
-            display: flex;
-            cursor: pointer;
-        }
-        .tab {
-            background-color: #e0e0e0;
-            padding: 10px 20px;
-            margin-right: 5px;
-            border: 1px solid #ccc;
-            border-radius: 5px 5px 0 0;
-            transition: background-color 0.3s;
-        }
-        .tab:hover {
-            background-color: #d0d0d0;
-        }
-        .tab.active {
-            background-color: #fff;
-            border-bottom: 1px solid #fff; /* 하단 경계선 제거 */
-        }
-        .tab-content {
-            display: none; /* 기본적으로 모든 탭 내용 숨기기 */
-            border: 1px solid #ccc;
-            border-radius: 0 0 5px 5px;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        .active-content {
-            display: block; /* 활성화된 탭의 내용만 표시 */
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr; /* 2열 그리드 */
-            grid-template-rows: 1fr 1fr; /* 2행 그리드 */
-            gap: 20px; /* 각 박스 간 간격 */
-            height: 100%;
-        }
-        .log-box {
-            background-color: #f9f9f9;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            padding: 15px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            overflow: auto; /* 내용이 넘칠 경우 스크롤 생성 */
-            display: flex;
-            flex-direction: column;
-            /* justify-content: space-between; */
-        }
-        #caserverTab {
-            height: 80vh; /* 화면의 100% 높이로 설정 */
-        }
-        #nodeLogsTab {
-            height: 80vh;
-        }
-        h2, h3 {
-            margin-top: 0;
-        }
-        pre {
-            white-space: pre-wrap; /* 줄 바꿈 허용 */
-            word-wrap: break-word; /* 긴 단어가 넘어갈 경우 줄 바꿈 */
-            max-height: 80%; /* 최대 높이 설정 */
-            overflow: auto; /* 스크롤 허용 */
-        }
-    </style>
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/hack-font@3/build/web/hack.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
-    <script>
-        var socket = io();
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/syntax.css') }}">
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 
-        // 로그 파일 내용 업데이트 처리
-        socket.on('log_update', function(data) {
-            var logContent = document.getElementById(data.filename);
-            logContent.innerText = data.content;  // 새로운 내용으로 업데이트
-        });
-
-        // 탭 전환 함수
-        function openTab(event, tabName) {
-            var i, tabcontent, tablinks;
-
-            // 모든 탭 내용 숨기기
-            tabcontent = document.getElementsByClassName("tab-content");
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
-            }
-
-            // 모든 탭 링크에서 active 클래스 제거
-            tablinks = document.getElementsByClassName("tab");
-            for (i = 0; i < tablinks.length; i++) {
-                tablinks[i].className = tablinks[i].className.replace(" active", "");
-            }
-
-            // 활성화된 탭 내용 표시
-            document.getElementById(tabName).style.display = "block";
-            event.currentTarget.className += " active";
-        }
-    </script>
 </head>
 <body>
-    <h1 style="text-align: center; margin: 10px 0;">Log Monitoring</h2>
-    <div class="tabs">
-        <div class="tab active" onclick="openTab(event, 'caserverTab')">caserver.log</div>
-        <div class="tab" onclick="openTab(event, 'nodeLogsTab')">Node Logs</div>
+    <div class="side-container" id="side-container">
+        <h2 style="text-align: center; margin: 20px 0;">Log Monitoring</h2>
+        <ul class="tab-list">
+            <li class="tab" onclick="openTab(event, 'caserverTab')">CA</li>
+            <li class="tab" onclick="openTab(event, 'nodesTab')">All Nodes</li>
+            <li class="tab" onclick="openTab(event, 'node1Tab')">Node1</li>
+            <li class="tab" onclick="openTab(event, 'node2Tab')">Node2</li>
+            <li class="tab" onclick="openTab(event, 'node3Tab')">Node3</li>
+            <li class="tab" onclick="openTab(event, 'node4Tab')">Node4</li>
+        </ul>
     </div>
 
-    <div id="caserverTab" class="tab-content active-content">
-        <div class="log-box" style="height: 95%;">
-            <h3>CA-Server</h3>
-            <pre id="caserver.log">{{ log_files['caserver.log'] }}</pre> <!-- 초기 로그 내용 표시 -->
+    <div id="main-container">
+        <div id="caserverTab" class="tab-content active-content">
+            <div class="log-box" style="height: 100%;">
+                <h3>CA-Server</h3>
+                <div class="log-content-box">
+                    <div class="content">
+                        <pre class="caserver.log">{{ log_files['caserver.log'] }}</pre>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <div id="nodeLogsTab" class="tab-content">
-        <div class="grid">
-            <div class="log-box">
+        <div id="nodesTab" class="tab-content">
+            <div class="grid">
+                <div class="log-box">
+                    <h3>Node1</h3>
+                    <div class="log-content-box">
+                        <div class="content">
+                            <pre class="node1.log">{{ log_files['node1.log'] }}</pre>
+                        </div>
+                    </div>
+                </div>
+                <div class="log-box">
+                    <h3>Node2</h3>
+                    <div class="log-content-box">
+                        <div class="content">
+                            <pre class="node2.log">{{ log_files['node2.log'] }}</pre>
+                        </div>
+                    </div>
+                </div>
+                <div class="log-box">
+                    <h3>Node3</h3>
+                    <div class="log-content-box">
+                        <div class="content">
+                            <pre class="node3.log">{{ log_files['node3.log'] }}</pre>
+                        </div>
+                    </div>
+                </div>
+                <div class="log-box">
+                    <h3>Node4</h3>
+                    <div class="log-content-box">
+                        <div class="content">
+                            <pre class="node4.log">{{ log_files['node4.log'] }}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="node1Tab" class="tab-content">
+            <div class="log-box" style="height: 100%;">
                 <h3>Node1</h3>
-                <pre id="node1.log">{{ log_files['node1.log'] }}</pre> <!-- 초기 로그 내용 표시 -->
+                <div class="log-content-box">
+                    <div class="content">
+                        <pre class="node1.log">{{ log_files['node1.log'] }}</pre>
+                    </div>
+                </div>
             </div>
-            <div class="log-box">
+        </div>
+
+        <div id="node2Tab" class="tab-content">
+            <div class="log-box" style="height: 100%;">
                 <h3>Node2</h3>
-                <pre id="node2.log">{{ log_files['node2.log'] }}</pre> <!-- 초기 로그 내용 표시 -->
+                <div class="log-content-box">
+                    <div class="content">
+                        <pre class="node2.log">{{ log_files['node2.log'] }}</pre>
+                    </div>
+                </div>
             </div>
-            <div class="log-box">
+        </div>
+
+        <div id="node3Tab" class="tab-content">
+            <div class="log-box" style="height: 100%;">
                 <h3>Node3</h3>
-                <pre id="node3.log">{{ log_files['node3.log'] }}</pre> <!-- 초기 로그 내용 표시 -->
+                <div class="log-content-box">
+                    <div class="content">
+                        <pre class="node3.log">{{ log_files['node3.log'] }}</pre>
+                    </div>
+                </div>
             </div>
-            <div class="log-box">
+        </div>
+
+        <div id="node4Tab" class="tab-content">
+            <div class="log-box" style="height: 100%;">
                 <h3>Node4</h3>
-                <pre id="node4.log">{{ log_files['node4.log'] }}</pre> <!-- 초기 로그 내용 표시 -->
+                <div class="log-content-box">
+                    <div class="content">
+                        <pre class="node4.log">{{ log_files['node4.log'] }}</pre>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
