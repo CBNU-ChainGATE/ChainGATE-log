@@ -110,18 +110,25 @@ function convertLogToHtml(text) {
 
     const colorRegex = /\u001b\[([\d;]+)m/g;
     let activeClasses = new Set();
-    let hasOpenSpan = false;
-
+    let hasOpenSpan = 0;
+    
     const htmlText = text.replace(colorRegex, (match, p1) => {
         const codes = p1.split(';');
         let result = '';
 
-        if (hasOpenSpan) {
-            result += '</span>';
-            hasOpenSpan = false;
-        }
+        // if (hasOpenSpan) {
+        //     result += '</span>';
+        //     hasOpenSpan = 0;
+        // }
+        
+        console.log("codes: ")
+        console.log(codes);
 
         if (codes.includes('0')) {
+            while (hasOpenSpan > 0) {
+                result += '</span>';
+                hasOpenSpan--;
+            }
             activeClasses.clear();
             return result;
         }
@@ -132,22 +139,25 @@ function convertLogToHtml(text) {
 
         if (newClasses.length > 0) {
             activeClasses = new Set([...activeClasses, ...newClasses]);
+            console.log("activeClasses: ")
+            console.log(activeClasses);
             result += `<span class="${Array.from(activeClasses).join(' ')}">`;
-            hasOpenSpan = true;
+            hasOpenSpan++;
         }
 
         return result;
     });
 
-    return hasOpenSpan ? htmlText + '</span>' : htmlText;
+    // return hasOpenSpan ? htmlText + '</span>' : htmlText;
+    return htmlText;
 }
 
 socket.on('log_update', function(data) {
     var logContents = document.getElementsByClassName(data.filename);
 
     // 색상 코드를 HTML로 변환
-    const colorConverted = convertLogToHtml(data.content);
-    const highlightedContent = highlightLog(colorConverted);
+    const highlightedContent = highlightLog(data.content);
+    const colorConverted = convertLogToHtml(highlightedContent);
 
     // 모든 요소에 대해 반복
     for (let i = 0; i < logContents.length; i++) {
@@ -155,7 +165,7 @@ socket.on('log_update', function(data) {
         const contentDiv = logContent.closest('.content');
 
         const isScrolledToBottom = contentDiv.scrollHeight - contentDiv.clientHeight <= contentDiv.scrollTop + (contentDiv.scrollHeight/10);
-        logContent.innerHTML = highlightedContent;
+        logContent.innerHTML = colorConverted;
 
         // 스크롤이 하단에 위치해 있으면 스크롤 이동
         if (isScrolledToBottom) {
