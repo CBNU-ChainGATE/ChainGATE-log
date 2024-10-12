@@ -111,7 +111,7 @@ function convertLogToHtml(text) {
     const colorRegex = /\u001b\[([\d;]+)m/g;
     let activeClasses = new Set();
     let hasOpenSpan = 0;
-    
+
     const htmlText = text.replace(colorRegex, (match, p1) => {
         const codes = p1.split(';');
         let result = '';
@@ -120,7 +120,7 @@ function convertLogToHtml(text) {
         //     result += '</span>';
         //     hasOpenSpan = 0;
         // }
-        
+
         console.log("codes: ")
         console.log(codes);
 
@@ -184,3 +184,22 @@ function openTab(event, tabContent) {
     contents.forEach(content => content.classList.remove('active-content'));
     document.getElementById(tabContent).classList.add('active-content');
 }
+
+function initializeLogs() {
+    const logFiles = ['caserver.log', 'node1.log', 'node2.log', 'node3.log', 'node4.log'];
+    logFiles.forEach(file => {
+        const logContents = document.getElementsByClassName(file);
+        for (let i = 0; i < logContents.length; i++) {
+            const logContent = logContents[i];
+            // 초기 하이라이팅 적용
+            const highlightedContent = highlightLog(logContent.innerHTML);
+            const colorConverted = convertLogToHtml(highlightedContent);
+            logContent.innerHTML = colorConverted;
+        }
+    });
+}
+
+// 페이지가 로드될 때 하이라이팅 적용
+window.onload = function() {
+    initializeLogs();  // 로그 내용을 초기화하고 하이라이팅 적용
+};
